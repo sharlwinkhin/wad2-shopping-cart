@@ -9,16 +9,45 @@ const categories = ref([])
 const selected_category = ref('fruit')
 const items = ref([])
 const cartItems = ref([]);
+const errorMsg = ref("")
 
 // local storage
 const STORAGE_KEY = "cart"
 
 // TODO: Fetch categories when the component is created
+onMounted(async () => {
+    let url = "http://127.0.0.1:3000/categories"
+    try {
+        let response = await axios.get(url)
+
+        console.log(response.data)
+
+        categories.value = response.data
+    } catch (error) {
+        errorMsg.value = "<span style='color:red;'> Error connecting to server </span>"
+        console.log(error.message)
+    }
+})
 
 
 // TODO: Fetch items for the currently selected category
 async function getItems() {
     // Add code
+    let url = "http://127.0.0.1:3000/items"
+    try {
+        let response = await axios.get(url, {
+            params: {
+                'category' : selected_category.value
+            }
+        })
+
+        console.log(response.data)
+
+        items.value = response.data
+    } catch (error) {
+        errorMsg.value = "<span style='color:red;'> Error connecting to server </span>"
+        console.log(error.message)
+    }
 }
 
 // Add selected items to cart
@@ -38,19 +67,21 @@ function doAddToCart(itemsToAdd) {
 
     // TODO: store current cartitems into local storage
     // cartItems.value is a JS (complex) obj. We need to use JSON.stringify to convert the JS obj to JSON string
-   
-    
+
+
 }
 
 </script>
 
 <template>
+    <p v-if="errorMsg" v-html="errorMsg"></p>
+
     <h1>Menu Items</h1>
-  
+
     <!-- TODO: Category selection dropdown -->
     <label for="categories">Categories</label>
-    <select class="form-control" id="categories" >
-        <option> category </option>
+    <select class="form-control" id="categories" v-model="selected_category" @change="getItems">
+        <option v-for="category in categories"> {{ category }} </option>
     </select>
     <br>
 
@@ -59,9 +90,9 @@ function doAddToCart(itemsToAdd) {
         <div class="row p-3">
             <div class='col-md-6 text-center'>
                 <!-- TODO: Show Items using ItemsBrowser-->
-                <button>
+                <ItemsBrowser v-bind:items="items" >
                     Add to Cart
-                </button>
+                </ItemsBrowser>
             </div>
         </div>
 
