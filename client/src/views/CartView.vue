@@ -24,6 +24,19 @@ onMounted(async () => {
 // TODO: Checkout cart items
 async function doCheckOut() {
    // add code
+
+   let url = "http://127.0.0.1:3000/checkout"
+
+   try {
+    let data = { cart : cartItems.value }
+    let response = await axios.post(url, data)
+
+    console.log(response.data)
+
+    receipt.value = response.data
+   } catch(error) {
+    console.log(error.message)
+   }
    
 }
 
@@ -49,17 +62,20 @@ function doClearCart() {
             <div class='col-md-6 text-center'>
                 <br>
                 <!-- TODO: show the shopping cart, using ShoppingCart comp -->
-                 <button>Check Out</button>
-                 <button>Clear Cart</button>
+                 <ShoppingCart :cart_items="cartItems" @checkout="doCheckOut">
+                    <template v-slot:checkout-btn-label>CheckOut</template>
+                    <template v-slot:reset-btn-label>Reset</template>
+                 </ShoppingCart>
+                
             </div>
         </div>
         <div class="row p-3" v-else>
             <div class='col text-start text-info'>
                 <!-- TODO: display receipt info -->
                 <h3>
-                    ReceiptID: 
+                    ReceiptID: {{  receipt.receiptID }}
                 </h3>
-                Total: $ <br>
+                Total: ${{ receipt.total }} <br>
                 <ul>
                     <li>
                          receiptname  x quantity 
