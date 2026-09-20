@@ -4,6 +4,7 @@ import ItemsBrowser from "../components/ItemsBrowser.vue";
 import axios from "axios";
 
 
+
 // Reactive data
 const categories = ref([])
 const selected_category = ref('fruit')
@@ -23,6 +24,14 @@ onMounted(async () => {
         console.log(response.data)
 
         categories.value = response.data
+
+        getItems()
+
+        let savedItems = localStorage.getItem(STORAGE_KEY)
+        if (savedItems != null) {
+            cartItems.value = JSON.parse(savedItems)
+            console.log(cartItems.value)
+        }
     } catch (error) {
         errorMsg.value = "<span style='color:red;'> Error connecting to server </span>"
         console.log(error.message)
@@ -44,6 +53,11 @@ async function getItems() {
         console.log(response.data)
 
         items.value = response.data
+
+         for (let item of items.value) {
+            item.quantity = 0;
+        }
+
     } catch (error) {
         errorMsg.value = "<span style='color:red;'> Error connecting to server </span>"
         console.log(error.message)
@@ -67,9 +81,12 @@ function doAddToCart(itemsToAdd) {
 
     // TODO: store current cartitems into local storage
     // cartItems.value is a JS (complex) obj. We need to use JSON.stringify to convert the JS obj to JSON string
+    let toSave = JSON.stringify(cartItems.value)
+    localStorage.setItem(STORAGE_KEY, toSave)
 
 
 }
+
 
 </script>
 
@@ -90,7 +107,7 @@ function doAddToCart(itemsToAdd) {
         <div class="row p-3">
             <div class='col-md-6 text-center'>
                 <!-- TODO: Show Items using ItemsBrowser-->
-                <ItemsBrowser v-bind:items="items" >
+                <ItemsBrowser v-bind:items="items" @addcart="doAddToCart" >
                     Add to Cart
                 </ItemsBrowser>
             </div>

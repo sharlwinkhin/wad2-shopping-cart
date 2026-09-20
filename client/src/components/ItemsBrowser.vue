@@ -1,16 +1,31 @@
 <script setup>
+import { ref } from 'vue'
 
 // TODO: Declare props (input)
+const props = defineProps( {
+    items : Array
+} )
 
 
 // TODO: Declare Emits (output) 
 // an 'addcart' event to notify the parent component when items are added
+const emits = defineEmits( ['addcart'] )
+
 
 
 // TODO: Handle button click to add selected items to the cart
 function doClick() {
+    console.log("in do click")
+    let itemsToAdd = []
+
+    for(let item of props.items) {
+        if (item.quantity > 0 ) {
+            itemsToAdd.push(item)
+        }
+    }
    
     // add code 
+    emits('addcart', itemsToAdd)
 
 }
 </script>
@@ -29,16 +44,16 @@ function doClick() {
                     </tr>
                 </thead>
                 <tbody>
-                    <tr>
-                        <td> item name </td>
-                        <td>$ item price </td>
+                    <tr v-for="item in items">
+                        <td> {{ item.name }} </td>
+                        <td>${{ item.price }} </td>
                         <td>
                             <!-- Input for selecting item quantity -->
-                            <input type="number" min="0" style="width:50px;">
+                            <input type="number" min="0" style="width:50px;" v-model.number="item.quantity">
                         </td>
                         <td>
                             <!-- Display subtotal for the item -->
-                            $ subtotal
+                            ${{ (item.price * item.quantity).toFixed(2) }}
                         </td>
                     </tr>
                 </tbody>
